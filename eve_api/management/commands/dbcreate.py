@@ -8,12 +8,14 @@ EVE_SWAGGER_URLS = {
     'stars': "https://esi.evetech.net/dev/universe/stars/",
     'regions': "https://esi.evetech.net/dev/universe/regions/",
     'constellations': "https://esi.evetech.net/dev/universe/constellations/",
+    'stargates': "https://esi.evetech.net/dev/universe/stargates/",
+    'stations': "https://esi.evetech.net/dev/universe/stargates/",
 }
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        data = requests.get(EVE_SWAGGER_URLS['stars'] + '40000001')
+        data = requests.get(EVE_SWAGGER_URLS['stargates'] + '50000056')
         star = data.json()
         print(star)
         # for index, region in enumerate(regions):
