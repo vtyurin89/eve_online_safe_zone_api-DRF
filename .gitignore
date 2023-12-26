@@ -19,3 +19,7 @@
 
 .venv
 /eve/secret.py
+/celerybeat-schedule.bak
+/celerybeat-schedule.dat
+/celerybeat-schedule.dir
+/eve_api/eve_log.txt
