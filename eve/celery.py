@@ -17,7 +17,7 @@ def debug_task(self):
 
 app.conf.beat_schedule = {
     'check-every-hour': {
-        'task': 'tasks.update_star_db',
+        'task': 'eve_api.tasks.update_star_db',
         'schedule': crontab(minute='*'),
     },
 }
