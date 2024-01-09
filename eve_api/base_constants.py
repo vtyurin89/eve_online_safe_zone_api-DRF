@@ -16,12 +16,10 @@ EVE_SWAGGER_URLS = {
 MAX_HOURS_LIMIT = 168
 
 
-# CHANGE RATING
+# Rates - how much each event changes the danger rating
 system_action_rates = {
     'ship_jumps': 1,
-    'ship_kills': 10,
-    'pod_kills': 1,
+    'ship_kills': 200,
+    'pod_kills': 200,
     'npc_kills': 1,
 }
-
-MAX_RATE_CHANGE = 10

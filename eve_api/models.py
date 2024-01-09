@@ -1,3 +1,4 @@
+import uuid
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Q
@@ -62,26 +63,17 @@ class System(models.Model):
     z = models.FloatField(blank=True, null=True)
     security_class = models.CharField(max_length=2, blank=True, null=True)
     security_status = models.FloatField(blank=True, null=True)
-    _danger_level = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(RATING_MAX_VALUE)],
-                    db_column='danger_level', default=0)
-    days_researched = models.PositiveIntegerField(default=0, db_column='days_researched')
-
-    @property
-    def danger_level(self):
-        return self._danger_level
-
-    @danger_level.setter
-    def danger_level(self, value):
-        self._danger_level = max(0, min(value, RATING_MAX_VALUE))
 
     class Meta:
         db_table = 'eve_api_system'
-        constraints = [
-            models.CheckConstraint(
-                check=Q(_danger_level__range=(0, RATING_MAX_VALUE)), name='range_of_danger_level'
-            )
-        ]
 
 
+class DangerRating(models.Model):
+    rating_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
+    system = models.ForeignKey('System', on_delete=models.CASCADE, related_name='danger_rating_units')
+    value = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.timestamp}"
 
