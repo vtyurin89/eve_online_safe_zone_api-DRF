@@ -8,6 +8,7 @@ import redis
 
 from .models import System
 from .serializers import SystemSerializer
+from django.conf import settings
 
 from django.db import connection
 
@@ -16,9 +17,9 @@ from django.db import connection
 @permission_classes((permissions.AllowAny,))
 def system_list(request):
     if request.method == 'GET':
-        my_redis = redis.Redis(host='localhost', port=6379, db=0)
+        my_redis = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
         result = json.loads(my_redis.get('latest_rating').decode('utf-8'))
-        return Response(result)
+        return Response(result, status=200)
 
 
 def system_detail(request, pk):

@@ -1,12 +1,6 @@
 import uuid
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import Q
-
-from .base_constants import MAX_HOURS_LIMIT
-
-
-RATING_MAX_VALUE = MAX_HOURS_LIMIT * 10
 
 
 class Stargate(models.Model):

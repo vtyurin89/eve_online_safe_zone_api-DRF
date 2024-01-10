@@ -2,10 +2,11 @@ from eve.celery import app
 import requests
 import json
 import redis
+from django.conf import settings
 
 from .models import System, DangerRating
-from .base_constants import EVE_SWAGGER_URLS, system_action_rates
 from .serializers import SystemSerializer
+from .base_constants import EVE_SWAGGER_URLS, system_action_rates
 
 
 @app.task
@@ -45,9 +46,10 @@ def update_star_db():
         for key in system_rating_change]
     DangerRating.objects.bulk_create(danger_rating_instances)
 
+    #update systems in redis
     systems = System.objects.all().prefetch_related('danger_rating_units')
     serializer = SystemSerializer(systems, many=True)
     systems_json = json.dumps(serializer.data)
-    my_redis = redis.StrictRedis(host='localhost', port=6379, db=0)
+    my_redis = redis.StrictRedis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
     my_redis.set('latest_rating', systems_json)
 

@@ -1,8 +1,7 @@
 from django.core.management.base import BaseCommand
 import redis
-import json
-from ...models import System, DangerRating
-from ...serializers import SystemSerializer
+
+
 
 
 class Command(BaseCommand):
