@@ -10,16 +10,23 @@ from .models import System
 from .serializers import SystemSerializer
 from django.conf import settings
 
-from django.db import connection
+
+redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
 
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def system_list(request):
     if request.method == 'GET':
-        my_redis = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
-        result = json.loads(my_redis.get('latest_rating').decode('utf-8'))
-        return Response(result, status=200)
+        systems = redis_client.get('system_list')
+        if systems is None:
+            systems = System.objects.all().prefetch_related('danger_rating_units')
+            serializer = SystemSerializer(systems, many=True)
+            systems_json = json.dumps(serializer.data)
+            redis_client.set('system_list', systems_json)
+            return Response(serializer.data, status=200)
+        systems = json.loads(systems)
+        return Response(systems, status=200)
 
 
 def system_detail(request, pk):
