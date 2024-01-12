@@ -22,6 +22,7 @@ def update_star_db():
             'ship_kills': item['ship_kills']
         }
         for item in system_kills}
+
     for item in system_jumps:
         if item['system_id'] not in system_dict:
             system_dict[item['system_id']] = {
@@ -39,7 +40,6 @@ def update_star_db():
             'pod_kills': 0,
             'ship_kills': 0,
             'ship_jumps': 0,
-
         }
         for system in missing_systems}
     system_dict.update(safe_systems_dict)
