@@ -7,7 +7,7 @@ from django.conf import settings
 
 from .models import System, DangerRating
 from .serializers import SystemSerializer
-from .base_constants import EVE_SWAGGER_URLS, system_action_rates
+from .base_constants import EVE_SWAGGER_URLS, system_event_rates
 
 
 @app.task
@@ -44,7 +44,7 @@ def update_star_db():
         for system in missing_systems}
     system_dict.update(safe_systems_dict)
     for item in system_dict:
-        system_dict[item]['rating_change'] = sum([system_action_rates.get(key, 0) * value
+        system_dict[item]['rating_change'] = sum([system_event_rates.get(key, 0) * value
                                                   for key, value in system_dict[item].items()])
     with open("eve_api/eve_log.txt", "a") as log_file:
         log_file.write(f'============NEW RECORDING: {time.ctime()} =============\n')
