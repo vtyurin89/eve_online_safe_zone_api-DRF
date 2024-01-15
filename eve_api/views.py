@@ -18,6 +18,8 @@ from .base_constants import QUERY_RESULT_CUT_SIZE, MAX_HOURS_LIMIT
 redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
 
 
+# cashing not implemented yet
+
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def get_random_safe_system(request):

@@ -20,7 +20,7 @@ class Command(BaseCommand):
             constellation = requests.get(EVE_SWAGGER_URLS['constellations'] + str(constellation))
             constellation = constellation.json()
             obj, created = Constellation.objects.get_or_create(
-                constellationid=constellation['constellation_id'],
+                constellation=constellation['constellation_id'],
                 name=constellation['name'],
                 x=constellation['position']['x'],
                 y=constellation['position']['y'],

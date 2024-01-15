@@ -33,6 +33,7 @@ def update_star_db():
             }
         else:
             system_dict[item['system_id']].update({'ship_jumps': item['ship_jumps']})
+
     missing_systems = System.objects.exclude(system_id__in=system_dict)
     safe_systems_dict = {system.system_id:
         {
@@ -60,9 +61,9 @@ def update_star_db():
 
 
     #update systems in redis
-    systems = System.objects.all().prefetch_related('danger_rating_units')
-    serializer = SystemSerializer(systems, many=True)
-    systems_json = json.dumps(serializer.data)
-    my_redis = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
-    my_redis.set('system_list', systems_json)
+    # systems = System.objects.all().prefetch_related('danger_rating_units')
+    # serializer = SystemSerializer(systems, many=True)
+    # systems_json = json.dumps(serializer.data)
+    # my_redis = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
+    # my_redis.set('system_list', systems_json)
 

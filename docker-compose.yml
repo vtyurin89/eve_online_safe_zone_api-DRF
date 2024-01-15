@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+
+  eve_api:
+    build: .
+    container_name: my-eve-api-container
+    ports:
+      - "8000:8000"
+    environment:
+      - MYSQL_PASSWORD=mysecretpassword
+    restart: always
+
+  mysql:
+    image: mysql:latest
+    container_name: my-mysql-container
+    command:
+      - --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3307:3307"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    restart: always
+
+  celery_worker:
+    image: "celery:latest"
+    container_name: my-celery-worker-container
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+
+  redis:
+    image: "redis:latest"
+    container_name: my-redis-container
+    restart: always
+    ports:
+      - "6379:6379"
