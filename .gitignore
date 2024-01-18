@@ -18,8 +18,13 @@
 .idea/**/dbnavigator.xml
 
 .venv
-/eve/secret.py
+/eve/config.py
 /celerybeat-schedule.bak
 /celerybeat-schedule.dat
 /celerybeat-schedule.dir
 /eve_api/eve_log.txt
+
+/mysql_data/
+/.env
+config.py
+

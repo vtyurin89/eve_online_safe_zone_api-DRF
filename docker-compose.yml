@@ -4,33 +4,40 @@ services:
 
   eve_api:
     build: .
-    container_name: my-eve-api-container
+    container_name: my_eve_api_container
     ports:
       - "8000:8000"
-    environment:
-      - MYSQL_PASSWORD=mysecretpassword
+    volumes:
+      - .:/eve_safe_zone
+    depends_on:
+      - mysql_db
+    command: python manage.py runserver 0.0.0.0:8000
     restart: always
 
-  mysql:
+  mysql_db:
     image: mysql:latest
-    container_name: my-mysql-container
+    container_name: my_mysql_container
     command:
       - --default-authentication-plugin=mysql_native_password
     ports:
-      - "3307:3307"
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: 'stardb'
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - ./mysql_data:/var/lib/mysql
+    env_file: .env
     restart: always
 
   celery_worker:
     image: "celery:latest"
-    container_name: my-celery-worker-container
+    container_name: my_celery_worker_container
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
 
   redis:
     image: "redis:latest"
-    container_name: my-redis-container
+    container_name: my_redis_container
     restart: always
     ports:
       - "6379:6379"

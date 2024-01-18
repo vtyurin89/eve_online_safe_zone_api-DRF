@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-from .secret import MYSQL_PASSWORD
+from .config import MYSQL_PASSWORD
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -92,8 +92,8 @@ DATABASES = {
         'NAME': 'stardb',
         'USER': 'root',
         'PASSWORD': MYSQL_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'HOST': 'mysql_db',
+        'PORT': '3307',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         }
