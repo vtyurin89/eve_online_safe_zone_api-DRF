@@ -93,7 +93,7 @@ DATABASES = {
         'USER': 'root',
         'PASSWORD': MYSQL_PASSWORD,
         'HOST': 'mysql_db',
-        'PORT': '3307',
+        'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         }
