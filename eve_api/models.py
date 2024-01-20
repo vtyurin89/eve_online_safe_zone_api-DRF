@@ -68,6 +68,9 @@ class DangerRating(models.Model):
     value = models.IntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'eve_api_dangerrating'
+
     def __str__(self):
         return f"{self.timestamp}"
 

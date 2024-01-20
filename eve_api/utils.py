@@ -6,6 +6,7 @@ from .base_constants import SYSTEM_SECURITY_LEVELS
 
 def get_filter_kwargs(value: str):
     """
+    The API allows urls like /?security_status=high-sec or /?security_status=low-sec
     :param value:  one of the keys in SYSTEM_SECURITY_LEVELS
     :return: dictionary to be used in a filter
     """

@@ -14,4 +14,3 @@ venv/
 *.njsproj
 *.sln
 *.sw*
-mysql_data/
