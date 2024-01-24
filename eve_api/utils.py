@@ -24,6 +24,8 @@ def select_random_object(input_queryset):
     :param input_queryset: queryset
     :return: random object from the queryset
     """
+    if len(input_queryset) == 0:
+        return None
 
     queryset_count = input_queryset.aggregate(count=Count('pk'))['count']
     random_index = random.randint(0, queryset_count - 1)
