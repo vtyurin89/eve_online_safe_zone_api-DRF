@@ -24,7 +24,6 @@
 /celerybeat-schedule.dir
 /eve_api/eve_log.txt
 
-/mysql_data/
 /.env
 config.py
 
