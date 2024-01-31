@@ -10,7 +10,8 @@ services:
     volumes:
       - .:/eve_safe_zone
     depends_on:
-      - mysql_db
+      mysql_db:
+        condition: service_healthy
     command:
       sh -c "python manage.py migrate &&
           python manage.py runserver 0.0.0.0:8000"
@@ -26,7 +27,6 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - ./mysql_data:/docker-entrypoint-initdb.d
-    env_file: .env
     restart: always
 
   celery_worker:
@@ -37,6 +37,9 @@ services:
       - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
     build:
       context: .
+    depends_on:
+      mysql_db:
+        condition: service_healthy
     command: celery -A eve worker --loglevel=info
     restart: always
 
