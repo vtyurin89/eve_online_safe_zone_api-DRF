@@ -10,6 +10,5 @@ COPY . .
 
 RUN pip install -r requirements.txt
 
-EXPOSE 8000
+RUN apt-get install -y default-mysql-client
 
-#CMD ["python", "manage.py", "migrate", "0.0.0.0:8000"]
