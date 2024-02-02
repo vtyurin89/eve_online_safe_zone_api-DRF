@@ -13,7 +13,7 @@ EVE_SWAGGER_URLS = {
 
 
 # RESEARCH LIMIT IN HOURS
-# Select numbers which are divisible by 24
+# Select numbers which are divisible by 24!
 MAX_HOURS_LIMIT = 168
 
 # Number of systems which will be in a 'safe' sample

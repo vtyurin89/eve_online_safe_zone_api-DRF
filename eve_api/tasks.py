@@ -1,9 +1,18 @@
+from django.db.models import QuerySet
 from eve.celery import app
 import requests
-from typing import Dict, List, Union
+from typing import Dict, Union
+from django.utils import timezone
+from datetime import timedelta
+import logging
 
 from .models import System, DangerRating
-from .base_constants import EVE_SWAGGER_URLS, system_event_rates
+from .base_constants import EVE_SWAGGER_URLS, system_event_rates, MAX_HOURS_LIMIT
+
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, filename="db_update_log.log", filemode="a",
+                    format="%(asctime)s %(levelname)s %(message)s \n")
 
 
 class UpdateStarDb:
@@ -56,6 +65,7 @@ class UpdateStarDb:
             DangerRating(system_id=key, value=self.system_data[key]['rating_change'])
             for key in self.system_data
         ]
+        logger.info(f"DB updated -- created {len(danger_rating_instances)} new 'DangerRating' objects.")
         DangerRating.objects.bulk_create(danger_rating_instances)
 
     def execute(self) -> None:
@@ -66,9 +76,33 @@ class UpdateStarDb:
         self._create_new_rating_objects()
 
 
+class DeleteOldRates:
+    def __init__(self, max_hours_limit: int):
+        self.days_range = max_hours_limit // 24
+        self.time_starting_point = timezone.now() - timedelta(days=self.days_range)
+
+    def _get_outdated_danger_rating_objects(self) -> QuerySet[DangerRating]:
+        outdated_objects = DangerRating.objects.exclude(
+            timestamp__range=(self.time_starting_point, timezone.now())
+        )
+        return outdated_objects
+
+    def execute(self) -> None:
+        outdated_objects = self._get_outdated_danger_rating_objects()
+        outdated_objects_count = outdated_objects.count()
+        outdated_objects.delete()
+        logger.info(f"DB updated -- deleted {outdated_objects_count} outdated 'DangerRating' objects.")
+
+
 @app.task
 def update_star_db_task():
     update_star_db = UpdateStarDb()
     update_star_db.execute()
+
+
+@app.task
+def delete_outdated_rates_task():
+    delete_old_rates = DeleteOldRates(MAX_HOURS_LIMIT)
+    delete_old_rates.execute()
 
 
