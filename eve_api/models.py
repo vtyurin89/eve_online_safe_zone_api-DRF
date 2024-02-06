@@ -58,6 +58,9 @@ class System(models.Model):
     security_class = models.CharField(max_length=2, blank=True, null=True)
     security_status = models.FloatField(blank=True, null=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         db_table = 'eve_api_system'
 

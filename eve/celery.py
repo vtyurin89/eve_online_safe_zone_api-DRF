@@ -20,8 +20,8 @@ app.conf.beat_schedule = {
         'task': 'eve_api.tasks.update_star_db_task',
         'schedule': crontab(minute=0, hour="*"),
     },
-    'check-twice-a-month': {
+    'check-every-day': {
         'task': 'eve_api.tasks.delete_outdated_rates_task',
-        'schedule': crontab(0, 0, day_of_month='1, 15'),
+        'schedule': crontab(minute=0, hour=0),
     },
 }

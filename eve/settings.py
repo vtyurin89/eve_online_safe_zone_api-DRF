@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
-from .config import MYSQL_PASSWORD, SECRET_KEY
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = SECRET_KEY
+SECRET_KEY = os.environ.get('SECRET_KEY', '')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -45,6 +45,10 @@ INSTALLED_APPS = [
     'debug_toolbar',
 ]
 
+
+LOGGING_CONFIG = None
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -54,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'eve_api.middleware.logging_middleware',
 ]
 
 INTERNAL_IPS = [
@@ -92,7 +97,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'stardb',
         'USER': 'root',
-        'PASSWORD': MYSQL_PASSWORD,
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD', ''),
         'HOST': 'mysql_db',
         'PORT': '3306',
         'OPTIONS': {
@@ -100,7 +105,6 @@ DATABASES = {
         }
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -126,7 +130,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -156,8 +160,8 @@ REDIS_PORT = '6379'
 CELERY_TIMEZONE = "Europe/Moscow"
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
-# CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
 CELERY_ACCEPT_CONTENT = ['application/json']
 
 CELERY_TASK_SERIALIZER = 'json'

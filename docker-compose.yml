@@ -11,6 +11,9 @@ services:
       - .:/eve_safe_zone
     depends_on:
       - mysql_db
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     expose:
       - 8000
     command: python manage.py runserver 0.0.0.0:8000
@@ -21,7 +24,7 @@ services:
     image: mysql:latest
     container_name: my_mysql
     command:
-      - --default-authentication-plugin=mysql_native_password
+      - --default-authentication-plugin=caching_sha2_password
     environment:
       MYSQL_DATABASE: 'stardb'
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}

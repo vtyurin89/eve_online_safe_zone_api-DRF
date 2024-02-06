@@ -27,3 +27,4 @@
 /.env
 config.py
 
+/logs/

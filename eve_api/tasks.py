@@ -1,21 +1,23 @@
+import requests
 from django.db.models import QuerySet
 from eve.celery import app
-import requests
 from typing import Dict, Union
 from django.utils import timezone
 from datetime import timedelta
-import logging
+from loguru import logger
 
 from .models import System, DangerRating
 from .base_constants import EVE_SWAGGER_URLS, system_event_rates, MAX_HOURS_LIMIT
 
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, filename="db_update_log.log", filemode="a",
-                    format="%(asctime)s %(levelname)s %(message)s \n")
+logger.add('logs/celery_logs/celery_log.log', format="{time:MMMM D, YYYY > HH:mm:ss} | {level} | {message} | {extra}",
+           level="DEBUG", rotation="50 MB")
 
 
 class UpdateStarDb:
+    """
+    This class updates database every hour, creating a DangerRating object for every System object.
+    """
     def __init__(self):
         self.DEFAULT_SYSTEM_VALUES = {
             'npc_kills': 0,
@@ -65,9 +67,10 @@ class UpdateStarDb:
             DangerRating(system_id=key, value=self.system_data[key]['rating_change'])
             for key in self.system_data
         ]
-        logger.info(f"DB updated -- created {len(danger_rating_instances)} new 'DangerRating' objects.")
         DangerRating.objects.bulk_create(danger_rating_instances)
+        logger.info(f"DB update by celery -- {len(danger_rating_instances)} new 'DangerRating' objects created.")
 
+    @logger.catch
     def execute(self) -> None:
         self._process_system_kills()
         self._process_system_jumps()
@@ -77,9 +80,16 @@ class UpdateStarDb:
 
 
 class DeleteOldRates:
+    """
+    This class deletes old DangerRating objects.
+    The frequency of this action depends on the max_hours_limit variable,
+    it determines the number of HOURS (converted to DAYS) that the DangerRating objects remain relevant.
+    """
     def __init__(self, max_hours_limit: int):
         self.days_range = max_hours_limit // 24
-        self.time_starting_point = timezone.now() - timedelta(days=self.days_range)
+        time_now = timezone.localtime(timezone.now())
+        self.time_starting_point = time_now - timedelta(days=self.days_range)
+        logger.info(f"DB update by celery -- 'DangerRating' objects created before {self.time_starting_point} will be deleted!")
 
     def _get_outdated_danger_rating_objects(self) -> QuerySet[DangerRating]:
         outdated_objects = DangerRating.objects.exclude(
@@ -87,11 +97,12 @@ class DeleteOldRates:
         )
         return outdated_objects
 
+    @logger.catch
     def execute(self) -> None:
         outdated_objects = self._get_outdated_danger_rating_objects()
         outdated_objects_count = outdated_objects.count()
         outdated_objects.delete()
-        logger.info(f"DB updated -- deleted {outdated_objects_count} outdated 'DangerRating' objects.")
+        logger.info(f"DB update by celery -- {outdated_objects_count} outdated 'DangerRating' objects successfully deleted.")
 
 
 @app.task
@@ -104,5 +115,3 @@ def update_star_db_task():
 def delete_outdated_rates_task():
     delete_old_rates = DeleteOldRates(MAX_HOURS_LIMIT)
     delete_old_rates.execute()
-
-
