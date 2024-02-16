@@ -21,6 +21,7 @@ logger.add('logs/main_log.log', format="{time:MMMM D, YYYY > HH:mm:ss} | {level}
 class RandomSafeSystemView(APIView, SystemHandlerMixin):
     permission_classes = (permissions.AllowAny,)
 
+    @logger.catch()
     def get(self, request):
         params = request.query_params.get('security_status', 'not_specified')
         logger.info(f"Processing {request.method} request for a random system. Security status: {params}")
