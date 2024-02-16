@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
-from .config import SECRET_KEY, MYSQL_PASSWORD
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,8 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = os.environ.get('SECRET_KEY', '')
-SECRET_KEY = SECRET_KEY
+SECRET_KEY = os.environ.get('SECRET_KEY', '')
+# SECRET_KEY = SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -99,10 +98,10 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'stardb',
         'USER': 'root',
-        # 'PASSWORD': os.environ.get('MYSQL_PASSWORD', ''),
-        'PASSWORD': MYSQL_PASSWORD,
-        # 'HOST': 'mysql_db',
-        'HOST': 'localhost',
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD', ''),
+        # 'PASSWORD': MYSQL_PASSWORD,
+        'HOST': 'mysql_db',
+        # 'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
@@ -158,16 +157,16 @@ REST_FRAMEWORK = {
 }
 
 # REDIS and CELERY related settings
-# REDIS_HOST = 'redis'
-REDIS_HOST = 'localhost'
+REDIS_HOST = 'redis'
+# REDIS_HOST = 'localhost'
 REDIS_PORT = '6379'
 
 CELERY_TIMEZONE = "Europe/Moscow"
 
-# CELERY_BROKER_URL = 'redis://redis:6379/0'
-# CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+# CELERY_BROKER_URL = 'redis://localhost:6379/0'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 
 CELERY_ACCEPT_CONTENT = ['application/json']
