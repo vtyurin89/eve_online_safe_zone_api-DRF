@@ -2,8 +2,8 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Subquery, OuterRef, Sum, QuerySet
 
-from .base_constants import MAX_HOURS_LIMIT, QUERY_RESULT_CUT_SIZE
 from .models import System, DangerRating
+from .base_constants import MAX_HOURS_LIMIT, QUERY_RESULT_CUT_SIZE
 from .utils import get_filter_kwargs
 
 
@@ -27,7 +27,3 @@ class SystemHandlerMixin:
         ).order_by('danger_rating')[:QUERY_RESULT_CUT_SIZE]
 
         return systems
-
-
-
-

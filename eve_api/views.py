@@ -6,9 +6,10 @@ from django.conf import settings
 from loguru import logger
 from rest_framework.views import APIView
 
+
 from .serializers import SystemSerializer
-from .utils import select_random_object
 from .mixins import SystemHandlerMixin
+from .utils import select_random_object
 from .base_constants import REDIS_SYSTEM_SETS_KEY
 
 

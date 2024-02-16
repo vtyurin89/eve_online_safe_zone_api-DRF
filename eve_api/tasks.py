@@ -9,7 +9,7 @@ from django.utils import timezone
 from datetime import timedelta
 from loguru import logger
 
-from .views import SystemHandlerMixin
+from .mixins import SystemHandlerMixin
 from .models import System, DangerRating
 from .serializers import SystemSerializer
 from .base_constants import EVE_SWAGGER_URLS, system_event_rates, \
@@ -41,21 +41,30 @@ class UpdateStarDb(SystemHandlerMixin):
     def _process_system_kills(self) -> None:
 
         system_kills = requests.get(EVE_SWAGGER_URLS['system_kills']).json()
+        with open('recent_data/5-kills_json.txt', 'w') as f:
+            json.dump(system_kills, f)
+
         for item in system_kills:
             self.system_data.setdefault(item['system_id'], {}).update({
                 'npc_kills': item['npc_kills'],
                 'pod_kills': item['pod_kills'],
                 'ship_kills': item['ship_kills'],
             })
+        with open('recent_data/1-system_kills.txt', 'w') as f:
+            json.dump(self.system_data, f)
 
     def _process_system_jumps(self) -> None:
 
         # Star system IDs in here may be different from IDs we got in the method above.
         # We need to update the system_data dictionary with missing IDs.
         system_jumps = requests.get(EVE_SWAGGER_URLS['system_jumps']).json()
+        with open('recent_data/6-jumps_json.txt', 'w') as f:
+            json.dump(system_jumps, f)
         for item in system_jumps:
             system_id = item['system_id']
             self.system_data.setdefault(system_id, {}).update({'ship_jumps': item['ship_jumps']})
+        with open('recent_data/2-system_kills-jumps.txt', 'w') as f:
+            json.dump(self.system_data, f)
 
     def _process_missing_systems(self) -> None:
 
@@ -65,6 +74,8 @@ class UpdateStarDb(SystemHandlerMixin):
         missing_systems = System.objects.exclude(system_id__in=self.system_data)
         safe_systems_dict = {system.system_id: self.DEFAULT_SYSTEM_VALUES for system in missing_systems}
         self.system_data.update(safe_systems_dict)
+        with open('recent_data/3-system_kills-jumps-missimg.txt', 'w') as f:
+            json.dump(self.system_data, f)
 
     def _calculate_rating(self) -> None:
         for item in self.system_data:
@@ -72,6 +83,8 @@ class UpdateStarDb(SystemHandlerMixin):
                 system_event_rates.get(key, 0) * value
                 for key, value in self.system_data[item].items()
             ])
+        with open('recent_data/4-system_kills-jumps-missimg-rating.txt', 'w') as f:
+            json.dump(self.system_data, f)
 
     def _create_new_rating_objects(self) -> None:
         danger_rating_instances = [

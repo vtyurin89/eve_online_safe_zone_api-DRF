@@ -28,3 +28,4 @@
 config.py
 
 /logs/
+/recent_data/
