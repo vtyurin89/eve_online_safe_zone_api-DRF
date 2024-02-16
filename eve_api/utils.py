@@ -10,7 +10,7 @@ def get_filter_kwargs(value: str):
     :param value:  one of the keys in SYSTEM_SECURITY_LEVELS
     :return: dictionary to be used in a filter
     """
-    if value not in SYSTEM_SECURITY_LEVELS:
+    if value == 'not_specified' or value not in SYSTEM_SECURITY_LEVELS:
         return {}
     filter_kwargs = {
         'security_status__gte': SYSTEM_SECURITY_LEVELS[value][0],

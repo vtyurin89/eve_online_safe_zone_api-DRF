@@ -14,6 +14,7 @@ IGNORED_PATHS = [
     "/static/rest_framework/js/default.js",
     "/static/rest_framework/css/prettify.css",
     "/static/rest_framework/css/bootstrap.min.css",
+    "/favicon.ico"
 ]
 
 
@@ -41,7 +42,7 @@ def logging_middleware(get_response):
                 response_size=len(response.content),
                 elapsed=elapsed,
             ).info(
-                "incoming '{method}' request to '{path}'",
+                "finished logging '{method}' request to '{path}'",
                 method=request.method,
                 path=request.path,
             )

@@ -36,3 +36,9 @@ system_event_rates = {
     'pod_kills': 200,
     'npc_kills': 1,
 }
+
+# Redis constants
+REDIS_SYSTEM_SETS_KEY = 'system_sets'
+REDIS_KEY_DELETE_IN_SECONDS = 60*59  # 59 minutes
+
+

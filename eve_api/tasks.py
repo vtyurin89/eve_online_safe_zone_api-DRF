@@ -1,20 +1,31 @@
+import json
 import requests
+import redis
 from django.db.models import QuerySet
+from django.conf import settings
 from eve.celery import app
 from typing import Dict, Union
 from django.utils import timezone
 from datetime import timedelta
 from loguru import logger
 
+from .views import SystemHandlerMixin
 from .models import System, DangerRating
-from .base_constants import EVE_SWAGGER_URLS, system_event_rates, MAX_HOURS_LIMIT
+from .serializers import SystemSerializer
+from .base_constants import EVE_SWAGGER_URLS, system_event_rates, \
+    MAX_HOURS_LIMIT, SYSTEM_SECURITY_LEVELS, REDIS_SYSTEM_SETS_KEY, REDIS_KEY_DELETE_IN_SECONDS
 
 
-logger.add('logs/celery_logs/celery_log.log', format="{time:MMMM D, YYYY > HH:mm:ss} | {level} | {message} | {extra}",
-           level="DEBUG", rotation="50 MB")
+logger.remove()
+logger.add('logs/main_log.log', format="{time:MMMM D, YYYY > HH:mm:ss} | {level} | {message} | {extra}",
+           level="DEBUG", rotation="60 MB", retention="7 days")
 
 
-class UpdateStarDb:
+redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
+
+
+class UpdateStarDb(SystemHandlerMixin):
+    logger = logger
     """
     This class updates database every hour, creating a DangerRating object for every System object.
     """
@@ -68,7 +79,22 @@ class UpdateStarDb:
             for key in self.system_data
         ]
         DangerRating.objects.bulk_create(danger_rating_instances)
-        logger.info(f"DB update by celery -- {len(danger_rating_instances)} new 'DangerRating' objects created.")
+        self.logger.info(f"DB update by celery -- {len(danger_rating_instances)} new 'DangerRating' objects created.")
+
+    def _update_redis_sets(self, redis_key: str, redis_expiration_in_seconds: int) -> None:
+        security_levels = [key for key in SYSTEM_SECURITY_LEVELS] + ['not_specified']
+        pipeline = redis_client.pipeline()
+
+        for security_status_key in security_levels:
+            systems = self._get_systems(security_status_key)
+            serialized_systems = SystemSerializer(systems, many=True).data
+            serialized_systems_json = json.dumps(serialized_systems)
+            pipeline.hset(redis_key, security_status_key, serialized_systems_json)
+            self.logger.info(f"Redis update {redis_key}: {security_status_key} with {systems.count()} systems:\
+                                        {[system_dict['name'] for system_dict in serialized_systems]}")
+
+        pipeline.execute()
+        redis_client.expire(redis_key, redis_expiration_in_seconds)
 
     @logger.catch
     def execute(self) -> None:
@@ -77,9 +103,11 @@ class UpdateStarDb:
         self._process_missing_systems()
         self._calculate_rating()
         self._create_new_rating_objects()
+        self._update_redis_sets(REDIS_SYSTEM_SETS_KEY, REDIS_KEY_DELETE_IN_SECONDS)
 
 
 class DeleteOldRates:
+    logger = logger
     """
     This class deletes old DangerRating objects.
     The frequency of this action depends on the max_hours_limit variable,
@@ -89,7 +117,7 @@ class DeleteOldRates:
         self.days_range = max_hours_limit // 24
         time_now = timezone.localtime(timezone.now())
         self.time_starting_point = time_now - timedelta(days=self.days_range)
-        logger.info(f"DB update by celery -- 'DangerRating' objects created before {self.time_starting_point} will be deleted!")
+        self.logger.info(f"DB update by celery -- 'DangerRating' objects created before {self.time_starting_point} will be deleted!")
 
     def _get_outdated_danger_rating_objects(self) -> QuerySet[DangerRating]:
         outdated_objects = DangerRating.objects.exclude(
@@ -102,7 +130,7 @@ class DeleteOldRates:
         outdated_objects = self._get_outdated_danger_rating_objects()
         outdated_objects_count = outdated_objects.count()
         outdated_objects.delete()
-        logger.info(f"DB update by celery -- {outdated_objects_count} outdated 'DangerRating' objects successfully deleted.")
+        self.logger.info(f"DB update by celery -- {outdated_objects_count} outdated 'DangerRating' objects successfully deleted.")
 
 
 @app.task
